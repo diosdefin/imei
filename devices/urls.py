@@ -1,0 +1,42 @@
+from django.urls import path
+from . import views
+from .views import (
+    AdminPanelView,
+    DashboardView,
+    DeviceCreateView,
+    DeviceDeleteView,
+    DeviceHistoryView,
+    DeviceListView,
+    DeviceRestoreView,
+    DeviceStatusUpdateView,
+    DeviceUpdateView,
+    ExportDevicesView,
+    ImeiLookupView,
+    ScanView,
+    add_device_from_scan,
+    DeviceSoftDeleteView,
+    DeviceAddManualView,
+    UserManagementView,
+    RegisterView,
+)
+
+urlpatterns = [
+    path('', DashboardView.as_view(), name='dashboard'),
+    path('devices/', DeviceListView.as_view(), name='device_list'),
+    path('devices/add/', DeviceCreateView.as_view(), name='device_add'),
+    path('devices/add-from-scan/', add_device_from_scan, name='add_from_scan'),
+    path('devices/add-manual/', DeviceAddManualView.as_view(), name='device_add_manual'),
+    path('devices/<int:pk>/edit/', DeviceUpdateView.as_view(), name='device_edit'),
+    path('devices/<int:pk>/delete/', DeviceDeleteView.as_view(), name='device_delete'),
+    path('devices/<int:pk>/soft-delete/', DeviceSoftDeleteView.as_view(), name='device_soft_delete'),
+    path('devices/<int:pk>/status/', DeviceStatusUpdateView.as_view(), name='device_status'),
+    path('devices/<int:pk>/history/', DeviceHistoryView.as_view(), name='device_history'),
+    path('devices/<int:pk>/restore/', DeviceRestoreView.as_view(), name='device_restore'),
+    path('scan/', ScanView.as_view(), name='scan'),
+    path('export/', ExportDevicesView.as_view(), name='export_devices'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('imeis/lookup/', ImeiLookupView.as_view(), name='imei_lookup'),
+    path('admin-panel/', AdminPanelView.as_view(), name='admin_panel'),
+    path('devices/trash/', views.device_trash, name='device_trash'),
+    path('user-management/', UserManagementView.as_view(), name='user_management'),
+]

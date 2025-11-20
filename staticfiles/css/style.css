@@ -1,0 +1,145 @@
+:root {
+    --primary: #2c5aa0;
+    --success: #28a745;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --info: #17a2b8;
+    --light: #f8f9fa;
+    --dark: #343a40;
+}
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.main-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    border: none;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.scanner-container {
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.table-custom {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.table-custom th {
+    background: linear-gradient(135deg, var(--primary), #3a7bd5);
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.table-custom td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-color: #f1f3f4;
+}
+
+.badge-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.btn-custom {
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.filter-section {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .main-container {
+        margin: 1rem;
+        border-radius: 15px;
+    }
+    
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .table-responsive {
+        border-radius: 10px;
+    }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Стили для сканера */
+#reader {
+    border-radius: 15px !important;
+}
+
+#reader video {
+    border-radius: 15px;
+}

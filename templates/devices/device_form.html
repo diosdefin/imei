@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags static %}
+{% block title %}{{ view.object|default:'Новое устройство' }} | IMEI Scanner{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    {% if view.object %}Редактирование устройства{% else %}Добавление устройства{% endif %}
+                </h5>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="alert alert-info d-none" id="imeiLookupStatus"></div>
+                    <!-- ДОБАВИТЬ ЭТУ КНОПКУ -->
+                    <div class="d-flex gap-2 justify-content-end mt-4">
+                        <a href="{% url 'device_list' %}" class="btn btn-outline-secondary">Отмена</a>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static 'js/imeicheck.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const imeiInput = document.getElementById('id_imei');
+            const modelInput = document.getElementById('id_model_name');
+            const statusBox = document.getElementById('imeiLookupStatus');
+            if (!imeiInput || !modelInput) return;
+
+            let lookupTimeout = null;
+
+            const showStatus = (message, tone = 'info') => {
+                if (!statusBox) return;
+                statusBox.classList.remove('d-none', 'alert-info', 'alert-success', 'alert-warning', 'alert-danger');
+                statusBox.classList.add(`alert-${tone}`);
+                statusBox.textContent = message;
+            };
+
+            const resetStatus = () => {
+                if (statusBox) {
+                    statusBox.classList.add('d-none');
+                }
+            };
+
+            const tryLookup = async () => {
+                const imei = imeiInput.value.trim();
+                if (imei.length !== 15 || !/^\d+$/.test(imei)) {
+                    resetStatus();
+                    return;
+                }
+                showStatus('⏳ Подбираем модель по IMEI...', 'info');
+                try {
+                    const data = await window.ImeiLookup.lookup(imei, "{% url 'imei_lookup' %}");
+                    if (data.formatted_name && !modelInput.value) {
+                        modelInput.value = data.formatted_name;
+                    }
+                    showStatus('✅ Модель подставлена автоматически.', 'success');
+                } catch (error) {
+                    showStatus(error.message || 'Не удалось получить данные по IMEI.', error.rateLimited ? 'warning' : 'danger');
+                }
+            };
+
+            imeiInput.addEventListener('input', () => {
+                clearTimeout(lookupTimeout);
+                lookupTimeout = setTimeout(tryLookup, 400);
+            });
+        });
+    </script>
+{% endblock %}

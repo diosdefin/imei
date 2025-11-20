@@ -1,0 +1,166 @@
+# Django
+*dump.py
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+uploads/
+
+# Backup files
+*.bak
+*.backup
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database
+*.db
+
+# Static files
+staticfiles/
+collectstatic/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Complexity
+output/*.html
+output/*/index.html
+
+# Sphinx documentation
+docs/_build/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# macOS
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# Linux
+*~
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+
+# Database migrations (optional - раскомментируйте если хотите игнорировать миграции)
+# main/migrations/

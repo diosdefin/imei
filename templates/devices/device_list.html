@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Устройства | IMEI Scanner{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0"><i class="fas fa-list"></i> Список устройств</h1>
+    <div class="d-flex flex-wrap gap-2">
+        {% if is_manager %}
+        <a href="{% url 'export_devices' %}" class="btn btn-outline-primary">
+            <i class="fas fa-file-excel"></i> Экспорт в Excel
+        </a>
+        {% endif %}
+        {% if is_operator %}
+        <a href="{% url 'scan' %}" class="btn btn-success">
+            <i class="fas fa-camera"></i> Сканировать IMEI
+        </a>
+        <a href="{% url 'device_add' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Добавить вручную
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Статистика и информация о фильтрах -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-bar text-primary me-2"></i>
+                            {% if active_filters %}
+                            Найдено устройств: <strong>{{ devices_count }}</strong>
+                            {% else %}
+                            Всего устройств: <strong>{{ devices_count }}</strong>
+                            {% endif %}
+                        </h6>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        {% if active_filters %}
+                        <a href="{% url 'device_list' %}" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-times me-1"></i>Очистить фильтры
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Расширенный фильтр -->
+<div class="advanced-filter mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0"><i class="fas fa-filter"></i> Расширенный фильтр</h6>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
+            data-bs-target="#filterCollapse">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+
+    <div class="collapse show" id="filterCollapse">
+        <form method="get" class="row g-3">
+            <!-- Поиск -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <label class="form-label">Поиск по IMEI, модели или комментарию</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="search" name="search" class="form-control" placeholder="Введите для поиска..."
+                        value="{{ request.GET.search|default:'' }}">
+                </div>
+            </div>
+
+            <!-- Статус -->
+            <div class="col-12 col-md-6 col-lg-2">
+                <label class="form-label">Статус устройства</label>
+                <select name="status" class="form-select">
+                    <option value="">Все статусы</option>
+                    <option value="in_stock" {% if request.GET.status == 'in_stock' %}selected{% endif %}>
+                        В наличии
+                    </option>
+                    <option value="sold" {% if request.GET.status == 'sold' %}selected{% endif %}>
+                        Продано
+                    </option>
+                </select>
+            </div>
+
+            <!-- Пользователь -->
+            <div class="col-12 col-md-6 col-lg-2">
+                <label class="form-label">Добавил пользователь</label>
+                <select name="user" class="form-select">
+                    <option value="">Все пользователи</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}" {% if request.GET.user == user.id|stringformat:"i" %}selected{% endif %}>
+                        {{ user.get_short_name|default:user.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Сортировка -->
+            <div class="col-12 col-md-6 col-lg-2">
+                <label class="form-label">Сортировка</label>
+                <select name="sort" class="form-select">
+                    <option value="date_desc" {% if request.GET.sort == 'date_desc' %}selected{% endif %}>Сначала новые</option>
+                    <option value="date_asc" {% if request.GET.sort == 'date_asc' %}selected{% endif %}>Сначала старые</option>
+                    <option value="imei" {% if request.GET.sort == 'imei' %}selected{% endif %}>По IMEI (А-Я)</option>
+                    <option value="model" {% if request.GET.sort == 'model' %}selected{% endif %}>По модели (А-Я)</option>
+                    <option value="status" {% if request.GET.sort == 'status' %}selected{% endif %}>По статусу</option>
+                </select>
+            </div>
+
+            <!-- Диапазон дат -->
+            <div class="col-12 col-md-6 col-lg-2">
+                <label class="form-label">Дата добавления (от)</label>
+                <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+                <label class="form-label">Дата добавления (до)</label>
+                <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+            </div>
+
+            <!-- Кнопки -->
+            <div class="col-12">
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter me-1"></i>Применить фильтры
+                    </button>
+                    <a href="{% url 'device_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i>Сбросить всё
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Быстрый доступ к корзине -->
+{% if is_manager %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="d-flex gap-2">
+            <a href="{% url 'device_trash' %}" class="btn btn-outline-warning btn-sm">
+                <i class="fas fa-trash me-1"></i>Просмотр корзины ({{ trash_count }})
+            </a>
+            <a href="{% url 'device_list' %}?status=in_stock" class="btn btn-outline-success btn-sm">
+                <i class="fas fa-box me-1"></i>В наличии
+            </a>
+            <a href="{% url 'device_list' %}?status=sold" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-shopping-cart me-1"></i>Продано
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Таблица устройств -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th width="15%"><i class="fas fa-barcode me-1"></i>IMEI</th>
+                        <th width="20%"><i class="fas fa-mobile me-1"></i>Модель</th>
+                        <th width="15%"><i class="fas fa-tag me-1"></i>Статус</th>
+                        <th width="20%"><i class="fas fa-comment me-1"></i>Комментарий</th>
+                        <th width="15%"><i class="fas fa-calendar-plus me-1"></i>Добавлено</th>
+                        <th width="10%"><i class="fas fa-user me-1"></i>Добавил</th>
+                        <th width="15%" class="text-end"><i class="fas fa-cog me-1"></i>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in devices %}
+                    <tr>
+                        <td>
+                            <code class="fw-bold">{{ device.imei }}</code>
+                        </td>
+                        <td>
+                            {% if device.model_name %}
+                            {{ device.model_name }}
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if device.pk %}
+                            {% if is_manager or user == device.added_by %}
+                            <select class="form-select form-select-sm status-selector" data-device-id="{{ device.pk }}"
+                                data-url="{% url 'device_status' device.pk %}">
+                                <option value="in_stock" {% if device.status == 'in_stock' %}selected{% endif %}>
+                                    В наличии
+                                </option>
+                                <option value="sold" {% if device.status == 'sold' %}selected{% endif %}>
+                                    Продано
+                                </option>
+                            </select>
+                            {% else %}
+                            <span class="badge bg-{% if device.status == 'in_stock' %}success{% elif device.status == 'sold' %}primary{% else %}secondary{% endif %}">
+                                {{ device.get_status_display }}
+                            </span>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if device.comment %}
+                            <span class="d-inline-block text-truncate" style="max-width: 200px;"
+                                title="{{ device.comment }}">
+                                {{ device.comment }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ device.date_added|date:"d.m.Y H:i" }}</small>
+                        </td>
+                        <td>
+                            <small>
+                                <strong>{{ device.added_by.username }}</strong>
+                                {% if device.added_by.get_full_name %}
+                                <br><span class="text-muted">{{ device.added_by.get_full_name }}</span>
+                                {% endif %}
+                            </small>
+                        </td>
+                        <td class="text-end">
+                            {% if device.pk %}
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'device_history' device.pk %}" class="btn btn-outline-secondary" 
+                                   title="История изменений">
+                                    <i class="fas fa-history"></i>
+                                </a>
+                                
+                                {% if is_manager or user == device.added_by %}
+                                    <a href="{% url 'device_edit' device.pk %}" class="btn btn-outline-primary" 
+                                       title="Редактировать устройство">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                {% endif %}
+                                
+                                {% if can_delete or user == device.added_by %}
+                                    <a href="{% url 'device_soft_delete' device.pk %}" class="btn btn-outline-warning"
+                                       title="Переместить в корзину">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <h5>Устройства не найдены</h5>
+                                <p class="mb-0">
+                                    {% if active_filters %}
+                                    Попробуйте изменить параметры фильтрации
+                                    {% else %}
+                                    Начните добавлять устройства через сканирование или ручной ввод
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Пагинация -->
+{% if is_paginated %}
+<nav aria-label="Навигация по страницам" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link"
+                href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">
+                <i class="fas fa-chevron-left"></i> Назад
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#"><i class="fas fa-chevron-left"></i> Назад</a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <li class="page-item active">
+            <a class="page-link" href="#">{{ num }}</a>
+        </li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ num }}{% if querystring %}&{{ querystring }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link"
+                href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">
+                Вперед <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#">Вперед <i class="fas fa-chevron-right"></i></a>
+        </li>
+        {% endif %}
+    </ul>
+
+    <div class="text-center mt-2">
+        <small class="text-muted">
+            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+            • Показано {{ page_obj.start_index }}-{{ page_obj.end_index }} из {{ page_obj.paginator.count }} устройств
+        </small>
+    </div>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'js/status.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Восстановление состояния фильтра
+        const filterCollapse = document.getElementById('filterCollapse');
+        const filterState = localStorage.getItem('filterCollapseState');
+
+        if (filterState === 'hidden') {
+            filterCollapse.classList.remove('show');
+        } else {
+            filterCollapse.classList.add('show');
+        }
+
+        // Сохранение состояния при изменении
+        const filterToggle = document.querySelector('[data-bs-target="#filterCollapse"]');
+        if (filterToggle) {
+            filterToggle.addEventListener('click', function () {
+                setTimeout(() => {
+                    const isVisible = filterCollapse.classList.contains('show');
+                    localStorage.setItem('filterCollapseState', isVisible ? 'visible' : 'hidden');
+                }, 100);
+            });
+        }
+
+        // Автоматическое применение фильтра при изменении некоторых полей
+        const autoSubmitFields = document.querySelectorAll('select[name="status"], select[name="sort"]');
+        autoSubmitFields.forEach(field => {
+            field.addEventListener('change', function () {
+                this.form.submit();
+            });
+        });
+
+        // Подсветка активных фильтров
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.toString()) {
+            const advancedFilter = document.querySelector('.advanced-filter');
+            if (advancedFilter) {
+                advancedFilter.classList.add('border-primary');
+            }
+        }
+    });
+</script>
+{% endblock %}

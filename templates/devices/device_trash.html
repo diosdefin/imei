@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Корзина | IMEI Scanner{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0"><i class="fas fa-trash"></i> Корзина устройств</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'device_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> К списку устройств
+        </a>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h6 class="mb-0">
+                            <i class="fas fa-trash text-warning me-2"></i>
+                            Устройств в корзине: <strong>{{ devices_count }}</strong>
+                        </h6>
+                        {% if urgent_count > 0 %}
+                            <small class="text-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                {{ urgent_count }} устройств будут удалены в течение недели
+                            </small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <small class="text-muted">
+                            Устройства хранятся в корзине 30 дней
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица устройств в корзине -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th width="15%"><i class="fas fa-barcode me-1"></i>IMEI</th>
+                        <th width="20%"><i class="fas fa-mobile me-1"></i>Модель</th>
+                        <th width="15%"><i class="fas fa-comment me-1"></i>Комментарий</th>
+                        <th width="15%"><i class="fas fa-calendar-plus me-1"></i>Добавлено</th>
+                        <th width="15%"><i class="fas fa-calendar-times me-1"></i>Удалено</th>
+                        <th width="10%"><i class="fas fa-clock me-1"></i>До удаления</th>
+                        <th width="10%"><i class="fas fa-user me-1"></i>Добавил</th>
+                        {% if is_manager %}
+                        <th width="15%" class="text-end"><i class="fas fa-cog me-1"></i>Действия</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in devices_with_info %}
+                        {% with device=item.device days_remaining=item.days_remaining is_urgent=item.is_urgent %}
+                        <tr>
+                            <td>
+                                <code class="fw-bold">{{ device.imei }}</code>
+                            </td>
+                            <td>
+                                {% if device.model_name %}
+                                    {{ device.model_name }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if device.comment %}
+                                    <span class="d-inline-block text-truncate" style="max-width: 200px;" 
+                                          title="{{ device.comment }}">
+                                        {{ device.comment }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ device.date_added|date:"d.m.Y H:i" }}</small>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ device.deleted_at|date:"d.m.Y H:i" }}</small>
+                            </td>
+                            <td>
+                                {% if days_remaining is not None %}
+                                    {% if is_urgent %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            {{ days_remaining }} дн.
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning">
+                                            {{ days_remaining }} дн.
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ device.added_by.get_short_name|default:device.added_by.username }}</small>
+                            </td>
+                            {% if is_manager %}
+                            <td class="text-end">
+                                {% if device.pk %}
+                                <div class="btn-group btn-group-sm">
+                                    <form method="post" action="{% url 'device_restore' device.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-success btn-sm" 
+                                                title="Восстановить из корзины">
+                                            <i class="fas fa-undo me-1"></i> Восстановить
+                                        </button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endwith %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="{% if is_manager %}8{% else %}7{% endif %}" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-trash fa-3x mb-3"></i>
+                                    <h5>Корзина пуста</h5>
+                                    <p class="mb-0">Удаленные устройства появятся здесь</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

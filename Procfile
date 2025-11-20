@@ -1,0 +1,1 @@
+web: gunicorn imei_manager.wsgi --log-file -
